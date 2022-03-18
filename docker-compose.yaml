@@ -2,8 +2,6 @@
 version: '3.1'
 
 volumes:
-  ingress-data:
-  letsencrypt:
   database-data:
 
 networks:
@@ -11,24 +9,14 @@ networks:
     external: false
 
 services:
-  ingress:
-    image: 'jc21/nginx-proxy-manager:latest'
-    restart: unless-stopped
-    networks:
-      - stack
-    ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
-    volumes:
-      - ingress-data:/data
-      - letsencrypt:/etc/letsencrypt
   database:
     image: postgres
     restart: always
     volumes:
       - database-data:/var/lib/postgresql/data/
     env_file: .env
+    ports:
+      - 5432:5432
     networks:
       - stack
 
@@ -41,12 +29,11 @@ services:
         - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
         - NEXT_PUBLIC_LICENSE_CONSENT=${NEXT_PUBLIC_LICENSE_CONSENT}
         - NEXT_PUBLIC_TELEMETRY_KEY=${NEXT_PUBLIC_TELEMETRY_KEY}
-    image: calendso/calendso:latest
     restart: always
     networks:
       - stack
-    # ports:
-    #   - 3000:3000
+    ports:
+      - 3000:3000
     env_file: .env
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DATABASE_HOST}/${POSTGRES_DB}
@@ -55,7 +42,14 @@ services:
 
 # Optional use of Prisma Studio. In production, comment out or remove the section below to prevent unwanted access to your database.
   studio:
-    image: calendso/calendso:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - BASE_URL=${BASE_URL}
+        - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+        - NEXT_PUBLIC_LICENSE_CONSENT=${NEXT_PUBLIC_LICENSE_CONSENT}
+        - NEXT_PUBLIC_TELEMETRY_KEY=${NEXT_PUBLIC_TELEMETRY_KEY}
     restart: always
     networks:
       - stack
@@ -70,4 +64,5 @@ services:
       - npx
       - prisma
       - studio
+      - --schema=/calcom/packages/prisma/schema.prisma
 # END SECTION: Optional use of Prisma Studio.

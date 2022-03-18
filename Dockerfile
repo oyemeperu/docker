@@ -1,14 +1,28 @@
 FROM node:14 as deps
 
 WORKDIR /calcom
-COPY calendso/package.json calendso/yarn.lock ./
-COPY calendso/apps/web/package.json calendso/apps/web/yarn.lock ./apps/web/
-COPY calendso/packages/prisma/package.json ./packages/prisma/package.json
-COPY calendso/packages/lib/package.json ./packages/lib/package.json
-COPY calendso/packages/tsconfig/package.json ./packages/tsconfig/package.json
+
+COPY cal.com/package.json cal.com/yarn.lock ./
+COPY cal.com/apps/web/package.json cal.com/apps/web/yarn.lock ./apps/web/
+COPY cal.com/packages/prisma/package.json ./packages/prisma/package.json
+COPY cal.com/packages/prisma/schema.prisma ./packages/prisma/schema.prisma
+COPY cal.com/packages/lib/package.json ./packages/lib/package.json
+COPY cal.com/packages/tsconfig/package.json ./packages/tsconfig/package.json
+
+COPY cal.com/packages/config/package.json ./packages/config/package.json
+COPY cal.com/packages/ee/package.json ./packages/ee/package.json
+COPY cal.com/packages/ui/package.json ./packages/ui/package.json
+COPY cal.com/packages/stripe/package.json ./packages/stripe/package.json
+
 # RUN yarn install --frozen-lockfile
+
 RUN yarn install
 
+# RUN yarn install
+
+FROM node:14 as builder
+
+WORKDIR /calcom
 ARG BASE_URL
 ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_LICENSE_CONSENT
@@ -18,9 +32,9 @@ ENV BASE_URL=$BASE_URL \
     NEXT_PUBLIC_LICENSE_CONSENT=$NEXT_PUBLIC_LICENSE_CONSENT \
     NEXT_PUBLIC_TELEMETRY_KEY=$NEXT_PUBLIC_TELEMETRY_KEY
 
-COPY calendso/package.json calendso/yarn.lock calendso/turbo.json ./
-COPY calendso/apps/web ./apps/web
-COPY calendso/packages ./packages
+COPY cal.com/package.json cal.com/yarn.lock cal.com/turbo.json ./
+COPY cal.com/apps/web ./apps/web
+COPY cal.com/packages ./packages
 COPY --from=deps /calcom/node_modules ./node_modules
 RUN yarn build && yarn install --production --ignore-scripts --prefer-offline
 
@@ -30,9 +44,9 @@ ENV NODE_ENV production
 RUN apt-get update && \
     apt-get -y install netcat && \
     rm -rf /var/lib/apt/lists/* && \
-    npm install --global prisma
+    yarn global add prisma
 
-COPY calendso/package.json calendso/yarn.lock calendso/turbo.json ./
+COPY cal.com/package.json cal.com/yarn.lock cal.com/turbo.json ./
 COPY --from=builder /calcom/node_modules ./node_modules
 COPY --from=builder /calcom/packages ./packages
 COPY --from=builder /calcom/apps/web/node_modules ./apps/web/node_modules
@@ -45,3 +59,4 @@ COPY --from=builder /calcom/apps/web/package.json ./apps/web/package.json
 COPY  scripts scripts
 
 EXPOSE 3000
+CMD ["/calcom/scripts/start.sh"]
