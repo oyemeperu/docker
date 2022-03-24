@@ -35,8 +35,8 @@ services:
     ports:
       - 3000:3000
     env_file: .env
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DATABASE_HOST}/${POSTGRES_DB}
+    # environment:
+    #   - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DATABASE_HOST}/${POSTGRES_DB}
     depends_on:
       - database
 
@@ -56,8 +56,8 @@ services:
     ports:
       - 5555:5555
     env_file: .env
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DATABASE_HOST}/${POSTGRES_DB}
+    # environment:
+    #   - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DATABASE_HOST}/${POSTGRES_DB}
     depends_on:
       - database
     command:
@@ -66,3 +66,7 @@ services:
       - studio
       - --schema=/calcom/packages/prisma/schema.prisma
 # END SECTION: Optional use of Prisma Studio.
+
+
+
+# ghr.io/oyemeperu/calcom:latest

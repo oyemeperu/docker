@@ -13,6 +13,9 @@ COPY cal.com/packages/config/package.json ./packages/config/package.json
 COPY cal.com/packages/ee/package.json ./packages/ee/package.json
 COPY cal.com/packages/ui/package.json ./packages/ui/package.json
 COPY cal.com/packages/stripe/package.json ./packages/stripe/package.json
+COPY cal.com/packages/app-store/package.json ./packages/app-store/package.json
+COPY cal.com/packages/core/package.json ./packages/core/package.json
+COPY cal.com/packages/types/package.json ./packages/types/package.json
 
 # RUN yarn install --frozen-lockfile
 
